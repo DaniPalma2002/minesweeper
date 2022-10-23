@@ -4,6 +4,7 @@
 
 
 # TAD gerador ******************************************************************
+from inspect import stack
 from textwrap import indent
 
 
@@ -211,6 +212,17 @@ def eh_coordenada(arg):
     return isinstance(arg, list) and len(arg) == 2 and \
             eh_args_coordenada(arg[0], arg[1])
 
+def eh_str_coordenada(arg):
+    '''
+    Reconhecedor
+
+    Devolve True se arg for do tipo str_coordenada (ex:A01, Z99)
+
+    eh_str_coordenada: universal -> boleano
+    '''
+    return (isinstance(arg, str) and len(arg) == 3 and
+        eh_coordenada(str_para_coordenada(arg)))
+
 
 def eh_args_coordenada(c, l):
     '''
@@ -259,7 +271,7 @@ def str_para_coordenada(s):
     str_para_coordenada: str -> coordenada
     '''
     # TODO abstracao, criar?
-    return [s[0], s[1:]]
+    return [s[0], int(s[1:])]
 
 
 def coluna_para_int(col):
@@ -352,7 +364,7 @@ def cria_copia_parcela(p):
     return p.copy()
 
 
-# TODO modificadores nao estao a alterar destrutivamente p
+# TODO modificadores nao estao a alterar destrutivamente p?
 def limpa_parcela(p):
     '''
     Modificador
@@ -579,6 +591,7 @@ def obtem_parcela(campo, coord):
 
     obtem_parcela: campo * coordenada -> parcela
     '''
+    #print('obtem_parcela: ', coord)
     return campo[obtem_linha(coord)-1][coluna_para_int(obtem_coluna(coord))]
 
 
@@ -605,9 +618,10 @@ def obtem_coordenadas(campo, s):
         return res_coord
 
     for i in range(len(campo)):
-        for j in range(len(i)):
-            if func_de_s[index_s]:
-                res_coord += (cria_coordenada(int_para_coluna(j), i+1),)
+        for j in range(len(campo[i])):
+            coord = cria_coordenada(int_para_coluna(j), i+1)
+            if func_de_s[index_s](obtem_parcela(campo, coord)):
+                res_coord += (coord,)
 
     return res_coord
 
@@ -628,7 +642,7 @@ def obtem_numero_minas_vizinhas(campo, coord):
         return 0
 
     for c in coord_vizinhas:
-        if eh_coordenada_do_campo(campo, coord):
+        if eh_coordenada_do_campo(campo, c):
             if eh_parcela_minada(obtem_parcela(campo, c)):
                 res_viz += 1
 
@@ -657,8 +671,32 @@ def eh_coordenada_do_campo(campo, coord):
 
     eh_coordenada_do_campo: campo * coordenada -> booleano
     '''
-    return (obtem_coluna(coord) < obtem_ultima_coluna(campo) and
+    return (obtem_coluna(coord) <= obtem_ultima_coluna(campo) and
             obtem_linha(coord) <= obtem_ultima_linha(campo))
+
+
+def eh_coord_campo_tapada(campo, coord):
+    '''
+    Reconhecedor
+
+    Devolve True se coord e uma coordenada valida dentro do campo e a sua parcela
+    tapada
+
+    eh_coord_campo_tapada: campo * coordenada -> booleano
+    '''
+    return (eh_coordenada_do_campo(campo, coord) and
+            eh_parcela_tapada(obtem_parcela(campo, coord)))
+
+
+def campos_iguais(c1, c2):
+    '''
+    Teste
+
+    Devolve True apenas se c1 e c2 forem campos e forem iguais
+
+    campos_iguais: campo * campo -> booleano
+    '''
+    return (eh_campo(c1) and eh_campo(c2) and c1 == c2)
 
 
 def campo_para_str(campo):
@@ -680,12 +718,12 @@ def campo_para_str(campo):
     '''
     res_string = '   '
     tam_coluna = coluna_para_int(obtem_ultima_coluna(campo)) + 1
+    # Criar coluna de A a coluna maxima do campo
     res_string += ''.join(chr(ord('A') + i) for i in range(tam_coluna))
-    res_string += '\n  +-----+\n'
-    print(res_string)
+    res_string += f'\n  +{"-"*tam_coluna}+\n'
 
     for i in range(obtem_ultima_linha(campo)):
-        res_string += f'{i+1:0>2d}|'
+        res_string += f'{i+1:0>2d}|' # numero de linha
         for j in range(tam_coluna):
             col = int_para_coluna(j)
             coord = cria_coordenada(col, i + 1)
@@ -694,34 +732,125 @@ def campo_para_str(campo):
             if parcela_str == '?': # verificar nº vizinhos para parcelas limpas
                                     # nao minadas
                 n_vizinhos = obtem_numero_minas_vizinhas(campo, coord)
-
                 parcela_str = ' ' if n_vizinhos == 0 else str(n_vizinhos)
-
 
             res_string += parcela_str
 
-        res_string += '|\n' if i < obtem_ultima_linha(campo)-1 else '|\n  +-----+'
+        res_string += '|\n' if i < obtem_ultima_linha(campo)-1 else \
+            f'|\n  +{"-"*tam_coluna}+'
 
     return res_string
 
 
+def coloca_minas(campo, coord, gerador, n):
+    '''
+    Funcao alto nivel
+
+    Modifica destrutivamente o campo m escondendo n minas em parcelas dentro do
+    campo. As n coordenadas sao geradas em sequencia utilizando o gerador g, de
+    modo a que nao coincidam com a coordenada c nem com nenhuma parcela vizinha
+    desta, nem se sobreponham com minas colocadas anteriormente
+
+    coloca_minas: campo * coordenada * gerador * int -> campo
+    '''
+    coord_max = cria_coordenada(obtem_ultima_coluna(campo), obtem_ultima_linha(campo))
+    while n > 0:
+        coord_aleatoria = obtem_coordenada_aleatoria(coord_max, gerador)
+        if (coord_aleatoria not in obtem_coordenadas_vizinhas(coord) and
+            not coordenadas_iguais(coord_aleatoria, coord)):
+            esconde_mina(obtem_parcela(campo, coord_aleatoria))
+            n -= 1
+    return campo
 
 
+def limpa_campo(campo, coord):
+    '''
+    Funcao alto nivel
+
+    Modifica destrutivamente o campo limpando a parcela na coordenada coord e o
+    devolvendo-a. Se nao houver nenhuma mina vizinha escondida, limpa
+    iterativamente todas as parcelas vizinhas. Caso a parcela se encontre ja limpa, a
+    operacao nao tem efeito
+
+    limpa_campo: campo * coordenada -> campo
+    '''
+    # TODO saber o output desta funcao é quebrar a abstracao??
+    # TODO ainda nao esta perfeito??
+    limpa_parcela(obtem_parcela(campo, coord))
+
+    if (obtem_numero_minas_vizinhas(campo, coord) != 0 or
+        eh_parcela_minada(obtem_parcela(campo, coord))):
+        return campo
+
+    stack_vizinhos = []
+    #primeira iteracao da coordenada principal
+    for v in obtem_coordenadas_vizinhas(coord):
+        if (eh_coord_campo_tapada(campo, v)):
+            stack_vizinhos.append(v)
+
+    #print(stack_vizinhos)
+    while len(stack_vizinhos) > 0:
+        c_atual = stack_vizinhos.pop()
+        limpa_parcela(obtem_parcela(campo, c_atual))
+        # so se c_atual nao ter minas na vizinhanca e que vamos aos seus vizinhos
+        if obtem_numero_minas_vizinhas(campo, c_atual) == 0:
+            for v in obtem_coordenadas_vizinhas(c_atual):
+                if (eh_coord_campo_tapada(campo, v) and
+                    v not in stack_vizinhos):
+                    stack_vizinhos.append(v)
+
+    return campo
+
+
+
+# Funcoes adicionais ***********************************************************
+def jogo_ganho(campo):
+    '''
+    Funcao auxiliar que recebe um campo do jogo das minas e devolve True se
+    todas as parcelas sem minas se encontram limpas, ou False caso contrario
+
+    jogo_ganho: campo -> booleano
+    '''
+    # verificando todas as parcelas tapadas, se uma delas nao tiver minas, o jogo
+    # ainda nao acabou
+    return not any(not eh_parcela_minada(obtem_parcela(campo, c))
+                   for c in obtem_coordenadas(campo, 'tapadas'))
+
+
+def turno_jogador(campo):
+    '''
+    Recebe um campo de minas e pede para escolher L ou M (limpar ou marcar) e a
+    coordenada para limpar, caso L retorna False caso limpamos uma parcela com mina
+
+    turno_jogador: campo -> booleano
+    '''
+    escolha = '0'
+    while escolha not in ('L', 'M'):
+        escolha = input('Escolha uma ação, [L]impar ou [M]arcar:')
+
+    coord_input = '0'
+    while not (eh_str_coordenada(coord_input) and
+               eh_coordenada_do_campo(campo, str_para_coordenada(coord_input))):
+        coord_input = input('Escolha uma coordenada:')
+
+    if escolha == 'L':
+        # TODO perguntar para limpar antes ou verificar antes?
+        coord = str_para_coordenada(coord_input)
+        limpa_campo(campo, coord)
+        if eh_parcela_minada(obtem_parcela(campo, coord)):
+            return False
+
+    return True
 
 
 
 def main():
-    m = cria_campo('E',5)
-    for l in 'ABC':esconde_mina(obtem_parcela(m, cria_coordenada(l,1)))
-    for l in 'BC':esconde_mina(obtem_parcela(m, cria_coordenada(l,2)))
-    for l in 'DE':limpa_parcela(obtem_parcela(m, cria_coordenada(l,1)))
-    for l in 'AD':limpa_parcela(obtem_parcela(m, cria_coordenada(l,2)))
-    for l in 'ABCDE':limpa_parcela(obtem_parcela(m, cria_coordenada(l,3)))
-    alterna_bandeira(obtem_parcela(m, cria_coordenada('D',4)))
-    #(m)
+    m = cria_campo('M',5)
+    g = cria_gerador(32, 2)
+    c = cria_coordenada('G', 3)
+    m = coloca_minas(m, c, g, 5)
+    print(turno_jogador(m))
     print(campo_para_str(m))
-
-
 
 if __name__ == '__main__':
     main()
