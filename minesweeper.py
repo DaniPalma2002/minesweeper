@@ -755,12 +755,16 @@ def coloca_minas(campo, coord, gerador, n):
     '''
     coord_max = cria_coordenada(obtem_ultima_coluna(campo), obtem_ultima_linha(campo))
     i = 0
+    res = ()
     while i < n:
         coord_aleatoria = obtem_coordenada_aleatoria(coord_max, gerador)
         if (coord_aleatoria not in obtem_coordenadas_vizinhas(coord) and
-            not coordenadas_iguais(coord_aleatoria, coord)):
+            not coordenadas_iguais(coord_aleatoria, coord) and
+            not eh_parcela_minada(obtem_parcela(campo, coord_aleatoria))):
             esconde_mina(obtem_parcela(campo, coord_aleatoria))
             i += 1
+            res += (coord_aleatoria,)
+            print(res)
     return campo
 
 
@@ -857,6 +861,7 @@ def minas(col, lin, n_parcelas, dim_gerarador, seed):
 
     minas: str * int * int * int * int -> booleano
     '''
+    # TODO value error e verificar o que acontece quando usamos mais bandeiras do que podemos
     m = cria_campo(col, lin)
     g = cria_gerador(dim_gerarador, seed)
 
@@ -869,7 +874,9 @@ def minas(col, lin, n_parcelas, dim_gerarador, seed):
         coord_input = input('Escolha uma coordenada:')
     coord_inicial = str_para_coordenada(coord_input)
 
+    # TODO PODEMOS LIMPAR SITIOS MARCADOS???
     coloca_minas(m, coord_inicial, g, n_parcelas)
+    print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
     limpa_campo(m, coord_inicial)
 
     while not jogo_ganho(m):
@@ -884,7 +891,7 @@ def minas(col, lin, n_parcelas, dim_gerarador, seed):
 
 
 def main():
-    minas('Z', 5, 6, 32, 2)
+    minas('Z', 5, 10, 32, 15)
     '''m = cria_campo('E',5)
     g = cria_gerador(32, 1)
     c = cria_coordenada('D', 4)
