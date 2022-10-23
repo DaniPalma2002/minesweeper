@@ -754,12 +754,13 @@ def coloca_minas(campo, coord, gerador, n):
     coloca_minas: campo * coordenada * gerador * int -> campo
     '''
     coord_max = cria_coordenada(obtem_ultima_coluna(campo), obtem_ultima_linha(campo))
-    while n > 0:
+    i = 0
+    while i < n:
         coord_aleatoria = obtem_coordenada_aleatoria(coord_max, gerador)
         if (coord_aleatoria not in obtem_coordenadas_vizinhas(coord) and
             not coordenadas_iguais(coord_aleatoria, coord)):
             esconde_mina(obtem_parcela(campo, coord_aleatoria))
-            n -= 1
+            i += 1
     return campo
 
 
@@ -833,24 +834,62 @@ def turno_jogador(campo):
                eh_coordenada_do_campo(campo, str_para_coordenada(coord_input))):
         coord_input = input('Escolha uma coordenada:')
 
+    coord = str_para_coordenada(coord_input)
     if escolha == 'L':
         # TODO perguntar para limpar antes ou verificar antes?
-        coord = str_para_coordenada(coord_input)
         limpa_campo(campo, coord)
         if eh_parcela_minada(obtem_parcela(campo, coord)):
             return False
-
+    else:
+        alterna_bandeira(obtem_parcela(campo, coord))
     return True
 
 
+def minas(col, lin, n_parcelas, dim_gerarador, seed):
+    '''
+    Funcao principal que permite jogar ao jogo das minas. A funcao recebe uma
+    cadeia de carateres e 4 valores inteiros correspondentes, respetivamente, a:
+    - ultima coluna c;
+    - ultima linha l;
+    - numero de parcelas com minas n;
+    - dimensao do gerador de numeros d;
+    - estado inicial ou seed s para a geracao de numeros aleatorios
+
+    minas: str * int * int * int * int -> booleano
+    '''
+    m = cria_campo(col, lin)
+    g = cria_gerador(dim_gerarador, seed)
+
+    # primeira coordenada para geracao minas
+    print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
+    print(campo_para_str(m))
+    coord_input = '0'
+    while not (eh_str_coordenada(coord_input) and
+               eh_coordenada_do_campo(m, str_para_coordenada(coord_input))):
+        coord_input = input('Escolha uma coordenada:')
+    coord_inicial = str_para_coordenada(coord_input)
+
+    coloca_minas(m, coord_inicial, g, n_parcelas)
+    limpa_campo(m, coord_inicial)
+
+    while not jogo_ganho(m):
+        print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
+        print(campo_para_str(m))
+        if not turno_jogador(m):
+            print('BOOOOOOOM!!!')
+            return False
+
+    print('VITORIA!!!')
+    return True
+
 
 def main():
-    m = cria_campo('M',5)
-    g = cria_gerador(32, 2)
-    c = cria_coordenada('G', 3)
-    m = coloca_minas(m, c, g, 5)
-    print(turno_jogador(m))
-    print(campo_para_str(m))
-
+    minas('Z', 5, 6, 32, 2)
+    '''m = cria_campo('E',5)
+    g = cria_gerador(32, 1)
+    c = cria_coordenada('D', 4)
+    m = coloca_minas(m, c, g, 2)
+    print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
+'''
 if __name__ == '__main__':
     main()
