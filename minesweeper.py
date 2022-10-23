@@ -50,7 +50,6 @@ def define_estado(gerador, i):
     define_estado: gerador * int -> int
     '''
     gerador[1] = i
-    print('i',i)
     return i
 
 
@@ -262,6 +261,18 @@ def str_para_coordenada(s):
     return [s[0], s[1:]]
 
 
+def coluna_para_int(col):
+    '''
+    Transformador
+
+    Recebe uma coluna bem formatada (entre A e Z maiuscula) e devolve o seu valor
+    inteiro entre A e col
+
+    coluna_para_int: str -> int
+    '''
+    return ord(col) - ord('A') + 1
+
+
 def obtem_coordenadas_vizinhas(c):
     '''
     Funcao de alto nivel
@@ -303,8 +314,234 @@ def obtem_coordenada_aleatoria(c, gerador):
     return cria_coordenada(col_aleatorio, lin_aleatorio)
 
 
-def main():
+
+# TAD parcela ******************************************************************
+def cria_parcela():
+    '''
+    Construtor
+
+    Devolve uma parcela tapada sem mina escondida
+    As parcelas sao do tipo [estado, mina], em que estado pode ser tapada, limpa
+    ou marcada, mina se tem ou nao
+
+    cria_pacela: {} -> parcela
+    '''
+    return ['tapada', 'sem mina']
+
+
+def cria_copia_parcela(p):
+    '''
+    Construtor
+
+    Devolve uma copia da parcela p
+
+    cria_copia_parcela: parcela -> parcela
+    '''
+    return p.copy()
+
+# TODO modificadores nao estao a alterar destrutivamente p
+def limpa_parcela(p):
+    '''
+    Modificador
+
+    Modifica destrutivamente a parcela p para estado limpa e devolve a propria parcela
+
+    limpa_parcela: parcela -> parcela
+    '''
+    p[0] = 'limpa'
+    return p
+
+
+def marca_parcela(p):
+    '''
+    Modificador
+
+    Modifica destrutivamente o estado da parcela para marcada com bandeira e
+    devolve a propria parcela
+
+    marca_parcela: parcela -> parcela
+    '''
+    p[0] = 'marcada'
+    return p
+
+
+def desmarca_parcela(p):
+    '''
+    Modificador
+
+    Modifica destrutivamente a parcela p modificando o seu estado para tapada e
+    devolve a propria parcela
+
+    desmarca_parcela: parcela -> parcela
+    '''
+    p[0] = 'tapada'
+    return p
+
+
+def esconde_mina(p):
+    '''
+    Modificador
+
+    Modifica destrutivamente a parcela p escondendo uma mina nela, e devolve a
+    propria parcela.
+
+    esconde_mina: parcela -> parcela
+    '''
+    p[1] = 'com mina'
+    return p
+
+def eh_parcela(arg):
+    '''
+    Reconhecedor
+
+    Devolve True caso o seu argumento seja um TAD parcela e False caso contrario
+
+    eh_parcela: universal -> booleano
+    '''
+    return (isinstance(arg, list) and len(arg) == 2 and
+            arg[0] in ('tapada', 'limpa', 'marcada') and
+            arg[1] in ('com mina', 'sem mina'))
+
+
+def eh_parcela_tapada(p):
+    '''
+    Reconhecedor
+
+    Devolve True caso a parcela p se encontre tapada e False caso contrario
+
+    eh_parcela_tapada: parcela -> booleano
+    '''
+    return p[0] == 'tapada'
+
+
+def eh_parcela_marcada(p):
+    '''
+    Reconhecedor
+
+    Devolve True caso a parcela p se encontre marcada com uma bandeira e False
+    caso contrario
+
+    eh_parcela_marcada: parcela -> booleano
+    '''
+    return p[0] == 'marcada'
+
+
+def eh_parcela_limpa(p):
+    '''
+    Reconhecedor
+
+    Devolve True caso a parcela p se encontre limpa e False caso contrario
+
+    eh_parcela_limpa: parcela -> booleano
+    '''
+    return p[0] == 'limpa'
+
+
+def eh_parcela_minada(p):
+    '''
+    Reconhecedor
+
+    Devolve True caso a parcela p esconda uma mina e False caso contrario
+
+    eh_parcela_minada: parcela -> booleano
+    '''
+    return p[1] == 'com mina'
+
+
+def parcelas_iguais(p1, p2):
+    '''
+    Teste
+
+    Devolve True apenas se p1 e p2 sao parcelas e sao iguais
+
+    parcelas_iguais: parcela * parcela -> booleano
+    '''
+    return eh_parcela(p1) and eh_parcela(p2) and p1 == p2
+
+
+def parcela_para_str(p):
+    '''
+    Transformador
+
+    Devolve a cadeia de caracteres que representa a parcela em funcao do seu
+    estado: parcelas tapadas ('#'), parcelas marcadas ('@'),
+    parcelas limpas sem mina ('?') e parcelas limpas com mina ('X')
+
+    parcela_para_str : parcela -> str
+    '''
+    if eh_parcela_tapada(p):
+        return '#'
+    elif eh_parcela_marcada(p):
+        return '@'
+    elif eh_parcela_limpa(p):
+        if not eh_parcela_minada(p):
+            return '?'
+        elif eh_parcela_minada(p):
+            return 'X'
+
+
+def alterna_bandeira(p):
+    '''
+    Funcao de alto nivel
+
+    recebe uma parcela p e modifica-a destrutivamente da seguinte forma: desmarca
+    se estiver marcada e marca se estiver tapada, devolvendo True.
+    Em qualquer outro caso, nao modifica a parcela e devolve False
+
+    alterna_bandeira: parcela -> booleano
+    '''
+    if eh_parcela_marcada(p):
+        desmarca_parcela(p)
+        return True
+    elif eh_parcela_tapada(p):
+        marca_parcela(p)
+        return True
+    else:
+        return False
+
+
+
+# TAD campo ********************************************************************
+def cria_campo(col, lin):
+    '''
+    Construtor
+
+    Recebe uma cadeia de carateres e um inteiro correspondentes a ultima coluna
+    e a ultima linha de um campo de minas, e devolve o campo do tamanho
+    pretendido formado por parcelas tapadas sem minas
+
+    cria_campo: str * int -> campo
+    '''
+    if not eh_args_coordenada(col, lin):
+        raise ValueError('cria_campo: argumentos invalidos')
+
+    # cria uma lista de tamanho nº linhas e sublistas de tamanho nº colunas
+    return [[cria_parcela() for _ in range(coluna_para_int(col))]
+            for _ in range(lin)]
+
+
+def cria_copia_campo(campo):
+    '''
+    Construtor
+
+    Recebe um campo e devolve uma nova copia do campo
+
+    cria_copia_campo: campo -> campo
+    '''
+    return [copia_campo[:] for copia_campo in campo]
+
+
+def obtem_ultima_coluna(campo):
     pass
+
+
+
+
+def main():
+    c = cria_campo('A', 2)
+    c2 = cria_copia_campo(c)
+    print(id(c2))
+
 
 if __name__ == '__main__':
     main()
