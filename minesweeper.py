@@ -4,6 +4,9 @@
 
 
 # TAD gerador ******************************************************************
+from textwrap import indent
+
+
 def cria_gerador(n_bits, seed):
     '''
     Construtor
@@ -73,7 +76,6 @@ def atualiza_estado(gerador):
     s ^= (s << valores_deslocamento[0]) & valor_hexa
     s ^= (s >> valores_deslocamento[1]) & valor_hexa
     s ^= (s << valores_deslocamento[2]) & valor_hexa
-
 
     return define_estado(gerador, s)
 
@@ -155,7 +157,6 @@ def gera_carater_aleatorio(gerador, c):
     '''
     atualiza_estado(gerador)
     seed = obtem_estado(gerador)
-    print(seed)
     l = ord(c.upper()) - ord('A') + 1
     return chr(seed % l + 65) #carater A (ord = 65)
 
@@ -266,11 +267,22 @@ def coluna_para_int(col):
     Transformador
 
     Recebe uma coluna bem formatada (entre A e Z maiuscula) e devolve o seu valor
-    inteiro entre A e col
+    inteiro entre A e col (0 a 25)
 
     coluna_para_int: str -> int
     '''
-    return ord(col) - ord('A') + 1
+    return ord(col) - ord('A')
+
+
+def int_para_coluna(i):
+    '''
+    Transformador
+
+    Recebe um inteiro entre 0 e 25 e retorna o caracter maiusculo entre A e Z
+
+    int_para_coluna: int -> str
+    '''
+    return chr(i + ord('A'))
 
 
 def obtem_coordenadas_vizinhas(c):
@@ -291,7 +303,7 @@ def obtem_coordenadas_vizinhas(c):
     for c_l in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
         col_viz = chr(ord(col) + c_l[0])
         lin_viz = lin + c_l[1]
-        if eh_args_coordenada(col_viz, lin_viz):
+        if eh_args_coordenada(col_viz, lin_viz) and col_viz:
             coord_vizinhas += (cria_coordenada(col_viz, lin_viz),)
     return coord_vizinhas
 
@@ -338,6 +350,7 @@ def cria_copia_parcela(p):
     cria_copia_parcela: parcela -> parcela
     '''
     return p.copy()
+
 
 # TODO modificadores nao estao a alterar destrutivamente p
 def limpa_parcela(p):
@@ -387,7 +400,7 @@ def esconde_mina(p):
 
     esconde_mina: parcela -> parcela
     '''
-    p[1] = 'com mina'
+    p[1] = 'minada'
     return p
 
 def eh_parcela(arg):
@@ -400,7 +413,7 @@ def eh_parcela(arg):
     '''
     return (isinstance(arg, list) and len(arg) == 2 and
             arg[0] in ('tapada', 'limpa', 'marcada') and
-            arg[1] in ('com mina', 'sem mina'))
+            arg[1] in ('minada', 'sem mina'))
 
 
 def eh_parcela_tapada(p):
@@ -445,7 +458,7 @@ def eh_parcela_minada(p):
 
     eh_parcela_minada: parcela -> booleano
     '''
-    return p[1] == 'com mina'
+    return p[1] == 'minada'
 
 
 def parcelas_iguais(p1, p2):
@@ -463,12 +476,15 @@ def parcela_para_str(p):
     '''
     Transformador
 
-    Devolve a cadeia de caracteres que representa a parcela em funcao do seu
-    estado: parcelas tapadas ('#'), parcelas marcadas ('@'),
-    parcelas limpas sem mina ('?') e parcelas limpas com mina ('X')
+    Devolve a cadeia de caracteres que representa a parcela em funcao do seu estado:
+    - parcelas tapadas ('#'),
+    - parcelas marcadas ('@'),
+    - parcelas limpas sem mina ('?')
+    - parcelas limpas minada ('X')
 
     parcela_para_str : parcela -> str
     '''
+    #TODO caso nao for um destes casos
     if eh_parcela_tapada(p):
         return '#'
     elif eh_parcela_marcada(p):
@@ -478,6 +494,7 @@ def parcela_para_str(p):
             return '?'
         elif eh_parcela_minada(p):
             return 'X'
+    return ' '
 
 
 def alterna_bandeira(p):
@@ -516,7 +533,7 @@ def cria_campo(col, lin):
         raise ValueError('cria_campo: argumentos invalidos')
 
     # cria uma lista de tamanho nº linhas e sublistas de tamanho nº colunas
-    return [[cria_parcela() for _ in range(coluna_para_int(col))]
+    return [[cria_parcela() for _ in range(coluna_para_int(col) + 1)]
             for _ in range(lin)]
 
 
@@ -532,15 +549,178 @@ def cria_copia_campo(campo):
 
 
 def obtem_ultima_coluna(campo):
-    pass
+    '''
+    Seletor
+
+    Devolve a cadeia de caracteres que corresponde a ultima coluna do
+    campo de minas
+
+    obtem_ultima_coluna: campo -> str
+    '''
+    return int_para_coluna(len(campo[0]) - 1)
+
+
+def obtem_ultima_linha(campo):
+    '''
+    Seletor
+
+    Devolve o valor inteiro que corresponde a ultima linha do campo de minas
+
+    obtem_ultima_linha: campo -> int
+    '''
+    return len(campo)
+
+
+def obtem_parcela(campo, coord):
+    '''
+    Seletor
+
+    Devolve a parcela do campo m que se encontra na coordenada coord
+
+    obtem_parcela: campo * coordenada -> parcela
+    '''
+    return campo[obtem_linha(coord)-1][coluna_para_int(obtem_coluna(coord))]
+
+
+def obtem_coordenadas(campo, s):
+    '''
+    Seletor
+
+    Devolve o tuplo formado pelas coordenadas ordenadas em ordem ascendente de
+    esquerda a direita e de cima a baixo das parcelas dependendo do valor de s:
+        - 'limpas' para as parcelas limpas,
+        - 'tapadas' para as parcelas tapadas,
+        - 'marcadas' para as parcelas marcadas, e
+        - 'minadas' para as parcelas que escondem minas
+
+    obtem_coordenadas: campo * str -> tuplo
+    '''
+    res_coord = ()
+    tipos_de_s = ('limpas', 'tapadas', 'marcadas', 'minadas')
+    func_de_s = (eh_parcela_limpa, eh_parcela_tapada,
+                 eh_parcela_marcada, eh_parcela_minada)
+    index_s = tipos_de_s.index(s)
+
+    if s not in tipos_de_s:
+        return res_coord
+
+    for i in range(len(campo)):
+        for j in range(len(i)):
+            if func_de_s[index_s]:
+                res_coord += (cria_coordenada(int_para_coluna(j), i+1),)
+
+    return res_coord
+
+
+
+def obtem_numero_minas_vizinhas(campo, coord):
+    '''
+    Seletor
+
+    Devolve o numero de parcelas vizinhas da parcela na coordenada coord que
+    escondem uma mina.
+
+    obtem_numero_minas_vizinhas: campo * coordenada -> int
+    '''
+    res_viz = 0
+    coord_vizinhas = obtem_coordenadas_vizinhas(coord) # ainda pode vir coordenadas
+    if len(coord_vizinhas) == 0:                       # que nao pertencem ao campo
+        return 0
+
+    for c in coord_vizinhas:
+        if eh_coordenada_do_campo(campo, coord):
+            if eh_parcela_minada(obtem_parcela(campo, c)):
+                res_viz += 1
+
+    return res_viz
+
+
+def eh_campo(arg):
+    '''
+    Reconhecedor
+
+    Devolve True caso o seu argumento seja um TAD campo e False caso contrario
+    Um TAD campo e uma lista de sublistas (de parcelas) com tamanho igual
+
+    eh_campo: universal -> booleano
+    '''
+    return (isinstance(arg, list) and
+            all(isinstance(i, list) and len(i) == len(arg[0]) and
+                all(eh_parcela(j) for j in i) for i in arg))
+
+
+def eh_coordenada_do_campo(campo, coord):
+    '''
+    Reconhecedor
+
+    Devolve True se coord e uma coordenada valida dentro do campo
+
+    eh_coordenada_do_campo: campo * coordenada -> booleano
+    '''
+    return (obtem_coluna(coord) < obtem_ultima_coluna(campo) and
+            obtem_linha(coord) <= obtem_ultima_linha(campo))
+
+
+def campo_para_str(campo):
+    '''
+    Transformador
+
+    Devolve uma cadeia de caracteres que representa o campo de minas como
+    mostrado nos exemplos:
+       ABCDE
+      +-----+
+    01|###2 |
+    02|3##2#|
+    03|1221 |
+    04|###@#|
+    05|#####|
+      +-----+
+
+    campo_para_str : campo -> str
+    '''
+    res_string = '   '
+    tam_coluna = coluna_para_int(obtem_ultima_coluna(campo)) + 1
+    res_string += ''.join(chr(ord('A') + i) for i in range(tam_coluna))
+    res_string += '\n  +-----+\n'
+    print(res_string)
+
+    for i in range(obtem_ultima_linha(campo)):
+        res_string += f'{i+1:0>2d}|'
+        for j in range(tam_coluna):
+            col = int_para_coluna(j)
+            coord = cria_coordenada(col, i + 1)
+
+            parcela_str = parcela_para_str(obtem_parcela(campo, coord))
+            if parcela_str == '?': # verificar nº vizinhos para parcelas limpas
+                                    # nao minadas
+                n_vizinhos = obtem_numero_minas_vizinhas(campo, coord)
+
+                parcela_str = ' ' if n_vizinhos == 0 else str(n_vizinhos)
+
+
+            res_string += parcela_str
+
+        res_string += '|\n' if i < obtem_ultima_linha(campo)-1 else '|\n  +-----+'
+
+    return res_string
+
+
+
 
 
 
 
 def main():
-    c = cria_campo('A', 2)
-    c2 = cria_copia_campo(c)
-    print(id(c2))
+    m = cria_campo('E',5)
+    for l in 'ABC':esconde_mina(obtem_parcela(m, cria_coordenada(l,1)))
+    for l in 'BC':esconde_mina(obtem_parcela(m, cria_coordenada(l,2)))
+    for l in 'DE':limpa_parcela(obtem_parcela(m, cria_coordenada(l,1)))
+    for l in 'AD':limpa_parcela(obtem_parcela(m, cria_coordenada(l,2)))
+    for l in 'ABCDE':limpa_parcela(obtem_parcela(m, cria_coordenada(l,3)))
+    alterna_bandeira(obtem_parcela(m, cria_coordenada('D',4)))
+    #(m)
+    print(campo_para_str(m))
+
 
 
 if __name__ == '__main__':
