@@ -888,16 +888,20 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
         coord_input = input('Escolha uma coordenada:')
     coord_inicial = str_para_coordenada(coord_input)
 
+    # TODO ELES DEVEM QUERER QUE MINAS NEM RODE ANTES DE VERIFICAR ISTO
     if not coloca_minas(m, coord_inicial, g, n_parcelas):
         raise ValueError('minas: argumentos invalidos')
     #print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
     limpa_campo(m, coord_inicial)
-
+    print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
+    print(campo_para_str(m))
+    
     while True:
+        turno = turno_jogador(m)
+        # TODO: quando se perde, ainda mostra o campo com a parcela minada
         print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
         print(campo_para_str(m))
-        #turno_jogador(m)
-        if not turno_jogador(m):
+        if not turno:
             print('BOOOOOOOM!!!')
             return False
         if jogo_ganho(m):
@@ -910,7 +914,7 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
 
 def main():
     minas('Z', 5, 10, 32, 15)
-    #print('   [Bandeiras 0/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:Escolha uma coordenada:   [Bandeiras 0/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1#21   111  12###########|\n04| 12#1        1############|\n05|  1#1        1############|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1@21   111  12###########|\n04| 12#1        1############|\n05|  1#1        1############|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1@21   111  12###########|\n04| 12X1        1############|\n05|  1#1        1############|\n  +--------------------------+\nBOOOOOOOM!!!\n')
+    #print('   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
     
 if __name__ == '__main__':
     main()
