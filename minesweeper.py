@@ -207,6 +207,7 @@ def eh_coordenada(arg):
     return isinstance(arg, list) and len(arg) == 2 and \
             eh_args_coordenada(arg[0], arg[1])
 
+
 def eh_str_coordenada(arg):
     '''
     Reconhecedor
@@ -215,7 +216,7 @@ def eh_str_coordenada(arg):
 
     eh_str_coordenada: universal -> boleano
     '''
-    return (isinstance(arg, str) and len(arg) == 3 and
+    return (isinstance(arg, str) and len(arg) == 3 and arg[1:].isdigit() and
         eh_coordenada(str_para_coordenada(arg)))
 
 
@@ -848,7 +849,9 @@ def turno_jogador(campo):
         if eh_parcela_minada(obtem_parcela(campo, coord)):
             return False
     else:
-        alterna_bandeira(obtem_parcela(campo, coord))
+        if not (len(obtem_coordenadas(campo, 'marcadas')) >= 
+            len(obtem_coordenadas(campo, 'minadas'))):
+            alterna_bandeira(obtem_parcela(campo, coord))
     return True
 
 
@@ -914,9 +917,10 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
 
 # TODO da para colocar mais minas do que o numero de casas do campo
 # TODO PODEMOS LIMPAR SITIOS MARCADOS???
+# TODO - VERIFICAR QUANDO PEDE A COORDENADA OU NO TURNO JOGADOR??
 
 def main():
-    minas('E', 5, 10, 32, 15)
+    minas('E', 5, 3, 32, 15)
     #print('   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
     
 if __name__ == '__main__':
