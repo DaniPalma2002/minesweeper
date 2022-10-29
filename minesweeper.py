@@ -754,7 +754,9 @@ def coloca_minas(campo, coord, gerador, n):
     
     if (len(obtem_coordenadas(campo, 'tapadas')) - 
         len(obtem_coordenadas_vizinhas(coord)) < n):
+        print('demasiadas minas')
         return False
+    
     while i < n:
         coord_aleatoria = obtem_coordenada_aleatoria(coord_max, gerador)
         if (coord_aleatoria not in obtem_coordenadas_vizinhas(coord) and
@@ -785,7 +787,9 @@ def limpa_campo(campo, coord):
     elif eh_parcela_minada(parcela) or obtem_numero_minas_vizinhas(campo, coord) != 0:
         #print('ola')
         limpa_parcela(parcela)
-        return campo
+        return campo   
+    
+
 
     stack_vizinhos = []
     #primeira iteracao da coordenada principal
@@ -840,7 +844,6 @@ def turno_jogador(campo):
 
     coord = str_para_coordenada(coord_input)
     if escolha == 'L':
-        # TODO perguntar para limpar antes ou verificar antes?
         limpa_campo(campo, coord)
         if eh_parcela_minada(obtem_parcela(campo, coord)):
             return False
@@ -854,9 +857,9 @@ def minas_exceptions(c, l, n, d, s):
     funcao para verificar os argumentos da funcao minas:
     - c, l verificado com eh_args_coordenada
     - s, s verificado com eh_args_gerador
-    - n verificado com 
     '''
-    return not (eh_args_coordenada(c, l) and eh_args_gerador(d, s))
+    return not (eh_args_coordenada(c, l) and eh_args_gerador(d, s) and
+                type(n) == int)
         
 
 
@@ -896,6 +899,7 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
     print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
     print(campo_para_str(m))
     
+    # loop principal
     while True:
         turno = turno_jogador(m)
         # TODO: quando se perde, ainda mostra o campo com a parcela minada
@@ -910,10 +914,9 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
 
 # TODO da para colocar mais minas do que o numero de casas do campo
 # TODO PODEMOS LIMPAR SITIOS MARCADOS???
-# 
 
 def main():
-    minas('Z', 5, 10, 32, 15)
+    minas('E', 5, 10, 32, 15)
     #print('   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
     
 if __name__ == '__main__':
