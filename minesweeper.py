@@ -778,12 +778,12 @@ def limpa_campo(campo, coord):
     '''
     #limpa_parcela(obtem_parcela(campo, coord))
     parcela = obtem_parcela(campo, coord)
-    print(parcela)
+    #print(parcela)
     
     if eh_parcela_limpa(parcela):
         return campo
     elif eh_parcela_minada(parcela) or obtem_numero_minas_vizinhas(campo, coord) != 0:
-        print('ola')
+        #print('ola')
         limpa_parcela(parcela)
         return campo
 
