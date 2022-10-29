@@ -2,6 +2,7 @@ import pytest
 import sys
 from minesweeper import *
 
+
 class TestPublicGerador:
     def test_1(self):
         g1 = cria_gerador(32, 1)
@@ -28,12 +29,12 @@ class TestPublicGerador:
 
     def test_6(self):
         g2 = cria_gerador(64, 1)
-        [atualiza_estado(g2) for n in range(5)]
+        [atualiza_estado(g2) for n in range(5)] 
         assert gerador_para_str(g2) == 'xorshift64(s=9659130143999365733)'
 
     def test_7(self):
         g2 = cria_gerador(64, 1)
-        [atualiza_estado(g2) for n in range(5)]
+        [atualiza_estado(g2) for n in range(5)] 
         gerador_para_str(g2)
         assert gera_carater_aleatorio(g2, 'Z') == 'L'
 
@@ -43,7 +44,7 @@ class TestPublicCoordenada:
         with pytest.raises(ValueError) as excinfo:
             cria_coordenada('A', 200)
         assert "cria_coordenada: argumentos invalidos" == str(excinfo.value)
-
+        
     def test_2(self):
         c1 = cria_coordenada('B', 1)
         c2 = cria_coordenada('N', 20)
@@ -68,7 +69,7 @@ class TestPublicParcela:
     def test_1(self):
         p1 = cria_parcela()
         assert parcela_para_str(p1) == '#'
-
+    
     def test_2(self):
         p1 = cria_parcela()
         assert parcela_para_str(limpa_parcela(p1)) == '?'
@@ -90,7 +91,7 @@ class TestPublicParcela:
 
     def test_6(self):
         p1 = cria_parcela()
-        p2 = cria_copia_parcela(p1)
+        p2 = cria_copia_parcela(p1) 
         alterna_bandeira(esconde_mina(p2))
         assert parcela_para_str(p2) == '@'
 
@@ -99,7 +100,7 @@ class TestPublicParcela:
 
     def test_8(self):
         p1 = cria_parcela()
-        p2 = cria_copia_parcela(p1)
+        p2 = cria_copia_parcela(p1) 
         alterna_bandeira(esconde_mina(p2))
         assert eh_parcela_minada(p2)
 
@@ -183,7 +184,7 @@ class TestPublicFunAux:
         g = cria_gerador(32, 2)
         c = cria_coordenada('G', 3)
         m = coloca_minas(m, c, g, 5)
-        assert turno_jogador_mooshak(m, 'L\nG03\n')
+        assert turno_jogador_mooshak(m, 'L\nG03\n')  == (True, 'Escolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:')
 
     def test_4(self):
         m = cria_campo('M',5)
@@ -192,15 +193,19 @@ class TestPublicFunAux:
         m = coloca_minas(m, c, g, 5)
         turno_jogador_mooshak(m, 'L\nG03\n')
         ref = '   ABCDEFGHIJKLM\n  +-------------+\n01|####1  1###1 |\n02|11111  113#2 |\n03|         2#2 |\n04|         111 |\n05|             |\n  +-------------+'
-        assert campo_para_str(m) == ref
+        assert campo_para_str(m) == ref 
 
     def test_5(self):
-        assert minas_mooshak('Z', 5, 6, 32, 2, 'M03\nM\nV01\nL\nW01\nL\nX01\nL\nX05\nL\nK01\n')
-
+        ref = (True,
+ '   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
+        assert minas_mooshak('Z', 5, 6, 32, 2, 'M03\nM\nV01\nL\nW01\nL\nX01\nL\nX05\nL\nK01\n') == ref
+    
     def test_6(self):
-        assert not minas_mooshak('Z', 5, 10, 32, 15, 'M3\nM03\nM\nC03\nL\nD04\n')
+        ref = (False,
+ '   [Bandeiras 0/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:Escolha uma coordenada:   [Bandeiras 0/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1#21   111  12###########|\n04| 12#1        1############|\n05|  1#1        1############|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1@21   111  12###########|\n04| 12#1        1############|\n05|  1#1        1############|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1@21   111  12###########|\n04| 12X1        1############|\n05|  1#1        1############|\n  +--------------------------+\nBOOOOOOOM!!!\n')
+        assert minas_mooshak('Z', 5, 10, 32, 15, 'M3\nM03\nM\nC03\nL\nD04\n') == ref
 
-### AUXILIAR CODE NECESSARY TO REPLACE STANDARD INPUT
+### AUXILIAR CODE NECESSARY TO REPLACE STANDARD INPUT 
 class ReplaceStdIn:
     def __init__(self, input_handle):
         self.input = input_handle.split('\n')
@@ -213,23 +218,49 @@ class ReplaceStdIn:
         self.line += 1
         return result
 
+class ReplaceStdOut:
+    def __init__(self):
+        self.output = ''
+
+    def write(self, s):
+        self.output += s
+        return len(s)
+
+    def flush(self):
+        return 
+
 
 def turno_jogador_mooshak(mapa, input_jogo):
     oldstdin = sys.stdin
     sys.stdin = ReplaceStdIn(input_handle=input_jogo)
+    
+    oldstdout, newstdout = sys.stdout,  ReplaceStdOut()
+    sys.stdout = newstdout
+
     try:
-        return turno_jogador(mapa)
+        res = turno_jogador(mapa)
+        text = newstdout.output
+        return res, text
     except ValueError as e:
         raise e
     finally:
         sys.stdin = oldstdin
+        sys.stdout = oldstdout
 
 def minas_mooshak(ncols, nlins, nminas, dim, seed, input_jogo):
     oldstdin = sys.stdin
     sys.stdin = ReplaceStdIn(input_handle=input_jogo)
+    
+    oldstdout, newstdout = sys.stdout,  ReplaceStdOut()
+    sys.stdout = newstdout
+
     try:
-        return minas(ncols, nlins, nminas, dim, seed)
+        res = minas(ncols, nlins, nminas, dim, seed)
+        text = newstdout.output
+        return res, text
     except ValueError as e:
         raise e
     finally:
         sys.stdin = oldstdin
+        sys.stdout = oldstdout
+

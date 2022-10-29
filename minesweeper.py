@@ -4,10 +4,6 @@
 
 
 # TAD gerador ******************************************************************
-from inspect import stack
-from textwrap import indent
-
-
 def cria_gerador(n_bits, seed):
     '''
     Construtor
@@ -17,7 +13,7 @@ def cria_gerador(n_bits, seed):
 
     cria_gerador: int * int -> gerador
     '''
-    if not (eh_args_gerador(n_bits, seed)):
+    if not eh_args_gerador(n_bits, seed):
         raise ValueError('cria gerador: argumentos invalidos')
 
     return [n_bits, seed]
@@ -91,7 +87,6 @@ def eh_args_gerador(n1, n2):
     eh_args_gerador: universal * universal -> booleano
     '''
     return type(n1) == int and type(n2) == int and n1 in (32, 64) and n2 > 0
-
 
 
 def eh_gerador(arg):
@@ -364,7 +359,6 @@ def cria_copia_parcela(p):
     return p.copy()
 
 
-# TODO modificadores nao estao a alterar destrutivamente p?
 def limpa_parcela(p):
     '''
     Modificador
@@ -414,6 +408,7 @@ def esconde_mina(p):
     '''
     p[1] = 'minada'
     return p
+
 
 def eh_parcela(arg):
     '''
@@ -626,7 +621,6 @@ def obtem_coordenadas(campo, s):
     return res_coord
 
 
-
 def obtem_numero_minas_vizinhas(campo, coord):
     '''
     Seletor
@@ -750,12 +744,17 @@ def coloca_minas(campo, coord, gerador, n):
     campo. As n coordenadas sao geradas em sequencia utilizando o gerador g, de
     modo a que nao coincidam com a coordenada c nem com nenhuma parcela vizinha
     desta, nem se sobreponham com minas colocadas anteriormente
+    
+    retorna False se nao tem espaco para colocar minas no campo
 
     coloca_minas: campo * coordenada * gerador * int -> campo
     '''
     coord_max = cria_coordenada(obtem_ultima_coluna(campo), obtem_ultima_linha(campo))
     i = 0
-    res = ()
+    
+    if (len(obtem_coordenadas(campo, 'tapadas')) - 
+        len(obtem_coordenadas_vizinhas(coord)) < n):
+        return False
     while i < n:
         coord_aleatoria = obtem_coordenada_aleatoria(coord_max, gerador)
         if (coord_aleatoria not in obtem_coordenadas_vizinhas(coord) and
@@ -763,8 +762,6 @@ def coloca_minas(campo, coord, gerador, n):
             not eh_parcela_minada(obtem_parcela(campo, coord_aleatoria))):
             esconde_mina(obtem_parcela(campo, coord_aleatoria))
             i += 1
-            res += (coord_aleatoria,)
-            print(res)
     return campo
 
 
@@ -779,12 +776,15 @@ def limpa_campo(campo, coord):
 
     limpa_campo: campo * coordenada -> campo
     '''
-    # TODO saber o output desta funcao é quebrar a abstracao??
-    # TODO ainda nao esta perfeito??
-    limpa_parcela(obtem_parcela(campo, coord))
-
-    if (obtem_numero_minas_vizinhas(campo, coord) != 0 or
-        eh_parcela_minada(obtem_parcela(campo, coord))):
+    #limpa_parcela(obtem_parcela(campo, coord))
+    parcela = obtem_parcela(campo, coord)
+    print(parcela)
+    
+    if eh_parcela_limpa(parcela):
+        return campo
+    elif eh_parcela_minada(parcela) or obtem_numero_minas_vizinhas(campo, coord) != 0:
+        print('ola')
+        limpa_parcela(parcela)
         return campo
 
     stack_vizinhos = []
@@ -849,7 +849,18 @@ def turno_jogador(campo):
     return True
 
 
-def minas(col, lin, n_parcelas, dim_gerarador, seed):
+def minas_exceptions(c, l, n, d, s):
+    '''
+    funcao para verificar os argumentos da funcao minas:
+    - c, l verificado com eh_args_coordenada
+    - s, s verificado com eh_args_gerador
+    - n verificado com 
+    '''
+    return not (eh_args_coordenada(c, l) and eh_args_gerador(d, s))
+        
+
+
+def minas(col, lin, n_parcelas, dim_gerador, seed):
     '''
     Funcao principal que permite jogar ao jogo das minas. A funcao recebe uma
     cadeia de carateres e 4 valores inteiros correspondentes, respetivamente, a:
@@ -861,9 +872,12 @@ def minas(col, lin, n_parcelas, dim_gerarador, seed):
 
     minas: str * int * int * int * int -> booleano
     '''
+    if minas_exceptions(col, lin, n_parcelas, dim_gerador, seed):
+        raise ValueError ('minas: argumentos invalidos')
+
     # TODO value error e verificar o que acontece quando usamos mais bandeiras do que podemos
     m = cria_campo(col, lin)
-    g = cria_gerador(dim_gerarador, seed)
+    g = cria_gerador(dim_gerador, seed)
 
     # primeira coordenada para geracao minas
     print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
@@ -874,29 +888,29 @@ def minas(col, lin, n_parcelas, dim_gerarador, seed):
         coord_input = input('Escolha uma coordenada:')
     coord_inicial = str_para_coordenada(coord_input)
 
-    # TODO PODEMOS LIMPAR SITIOS MARCADOS???
-    coloca_minas(m, coord_inicial, g, n_parcelas)
-    print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
+    if not coloca_minas(m, coord_inicial, g, n_parcelas):
+        raise ValueError('minas: argumentos invalidos')
+    #print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
     limpa_campo(m, coord_inicial)
 
-    while not jogo_ganho(m):
+    while True:
         print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
         print(campo_para_str(m))
+        #turno_jogador(m)
         if not turno_jogador(m):
             print('BOOOOOOOM!!!')
             return False
+        if jogo_ganho(m):
+            print('VITORIA!!!')
+            return True
 
-    print('VITORIA!!!')
-    return True
-
+# TODO da para colocar mais minas do que o numero de casas do campo
+# TODO PODEMOS LIMPAR SITIOS MARCADOS???
+# 
 
 def main():
     minas('Z', 5, 10, 32, 15)
-    '''m = cria_campo('E',5)
-    g = cria_gerador(32, 1)
-    c = cria_coordenada('D', 4)
-    m = coloca_minas(m, c, g, 2)
-    print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
-'''
+    #print('   [Bandeiras 0/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:Escolha uma coordenada:   [Bandeiras 0/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1#21   111  12###########|\n04| 12#1        1############|\n05|  1#1        1############|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1@21   111  12###########|\n04| 12#1        1############|\n05|  1#1        1############|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/10]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|        1#1     1#########|\n02| 111    1#1   112#########|\n03| 1@21   111  12###########|\n04| 12X1        1############|\n05|  1#1        1############|\n  +--------------------------+\nBOOOOOOOM!!!\n')
+    
 if __name__ == '__main__':
     main()
