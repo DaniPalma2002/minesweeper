@@ -745,19 +745,19 @@ def coloca_minas(campo, coord, gerador, n):
     campo. As n coordenadas sao geradas em sequencia utilizando o gerador g, de
     modo a que nao coincidam com a coordenada c nem com nenhuma parcela vizinha
     desta, nem se sobreponham com minas colocadas anteriormente
-    
+
     retorna False se nao tem espaco para colocar minas no campo
 
     coloca_minas: campo * coordenada * gerador * int -> campo
     '''
     coord_max = cria_coordenada(obtem_ultima_coluna(campo), obtem_ultima_linha(campo))
     i = 0
-    
-    if (len(obtem_coordenadas(campo, 'tapadas')) - 
+
+    if (len(obtem_coordenadas(campo, 'tapadas')) -
         len(obtem_coordenadas_vizinhas(coord)) < n):
         print('demasiadas minas')
         return False
-    
+
     while i < n:
         coord_aleatoria = obtem_coordenada_aleatoria(coord_max, gerador)
         if (coord_aleatoria not in obtem_coordenadas_vizinhas(coord) and
@@ -782,14 +782,14 @@ def limpa_campo(campo, coord):
     #limpa_parcela(obtem_parcela(campo, coord))
     parcela = obtem_parcela(campo, coord)
     #print(parcela)
-    
+
     if eh_parcela_limpa(parcela):
         return campo
     elif eh_parcela_minada(parcela) or obtem_numero_minas_vizinhas(campo, coord) != 0:
         #print('ola')
         limpa_parcela(parcela)
-        return campo   
-    
+        return campo
+
 
 
     stack_vizinhos = []
@@ -849,7 +849,7 @@ def turno_jogador(campo):
         if eh_parcela_minada(obtem_parcela(campo, coord)):
             return False
     else:
-        if not (len(obtem_coordenadas(campo, 'marcadas')) >= 
+        if not (len(obtem_coordenadas(campo, 'marcadas')) >=
             len(obtem_coordenadas(campo, 'minadas'))):
             alterna_bandeira(obtem_parcela(campo, coord))
     return True
@@ -863,7 +863,7 @@ def minas_exceptions(c, l, n, d, s):
     '''
     return not (eh_args_coordenada(c, l) and eh_args_gerador(d, s) and
                 type(n) == int)
-        
+
 
 
 def minas(col, lin, n_parcelas, dim_gerador, seed):
@@ -901,7 +901,7 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
     limpa_campo(m, coord_inicial)
     print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
     print(campo_para_str(m))
-    
+
     # loop principal
     while True:
         turno = turno_jogador(m)
@@ -920,8 +920,8 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
 # TODO - VERIFICAR QUANDO PEDE A COORDENADA OU NO TURNO JOGADOR??
 
 def main():
-    minas('E', 5, 3, 32, 15)
+    minas('C', 5, 10, 32, 15)
     #print('   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
-    
+
 if __name__ == '__main__':
     main()
