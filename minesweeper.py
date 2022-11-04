@@ -8,7 +8,7 @@ def cria_gerador(n_bits, seed):
     '''
     Construtor
 
-    Recebe n_bits (nº de bits do gerador) e uma seed (estado inicial)
+    Recebe n_bits (n de bits do gerador) e uma seed (estado inicial)
     e devolve o gerador correspondente
 
     cria_gerador: int * int -> gerador
@@ -57,7 +57,7 @@ def atualiza_estado(gerador):
     '''
     Modificador
 
-    atualiza a seed do gerador de acordo com o algoritmo xorshift (geracao de nºs
+    atualiza a seed do gerador de acordo com o algoritmo xorshift (geracao de ns
     pseudoaleatorios) e devolve-o
 
     atualiza_estado: gerador -> int
@@ -86,7 +86,8 @@ def eh_args_gerador(n1, n2):
 
     eh_args_gerador: universal * universal -> booleano
     '''
-    return type(n1) == int and type(n2) == int and n1 in (32, 64) and n2 > 0
+    return (type(n1) == int and type(n2) == int and n1 in (32, 64) and
+            0 < n2 <= 2**n1) #  TODO
 
 
 def eh_gerador(arg):
@@ -110,7 +111,7 @@ def geradores_iguais(g1, g2):
 
     geradores_iguais: gerador * gerador -> booleano
     '''
-    # TODO isto é abstrato?
+    # TODO isto e abstrato?
     return eh_gerador(g1) and eh_gerador(g2) and g1 == g2
 
 
@@ -162,7 +163,7 @@ def cria_coordenada(col, lin):
     '''
     Construtor
 
-    Recebe os valores correspondentes À coluna col e linha lin e devolve a coord
+    Recebe os valores correspondentes a coluna col e linha lin e devolve a coord
     correspondente
 
     cria_coordenada: str * int -> coordenada
@@ -539,7 +540,7 @@ def cria_campo(col, lin):
     if not eh_args_coordenada(col, lin):
         raise ValueError('cria_campo: argumentos invalidos')
 
-    # cria uma lista de tamanho nº linhas e sublistas de tamanho nº colunas
+    # cria uma lista de tamanho n linhas e sublistas de tamanho n colunas
     return [[cria_parcela() for _ in range(coluna_para_int(col) + 1)]
             for _ in range(lin)]
 
@@ -723,7 +724,7 @@ def campo_para_str(campo):
             coord = cria_coordenada(col, i + 1)
 
             parcela_str = parcela_para_str(obtem_parcela(campo, coord))
-            if parcela_str == '?': # verificar nº vizinhos para parcelas limpas
+            if parcela_str == '?': # verificar n vizinhos para parcelas limpas
                                     # nao minadas
                 n_vizinhos = obtem_numero_minas_vizinhas(campo, coord)
                 parcela_str = ' ' if n_vizinhos == 0 else str(n_vizinhos)
@@ -864,7 +865,6 @@ def minas_exceptions(c, l, n, d, s):
                 type(n) == int and 1 <= n <= l * (coluna_para_int(c)+1) - 9) # TODO
 
 
-
 def minas(col, lin, n_parcelas, dim_gerador, seed):
     '''
     Funcao principal que permite jogar ao jogo das minas. A funcao recebe uma
@@ -914,17 +914,3 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
         if jogo_ganho(m):
             print('VITORIA!!!')
             return True
-
-# TODO da para colocar mais minas do que o numero de casas do campo
-# TODO PODEMOS LIMPAR SITIOS MARCADOS???
-# TODO - VERIFICAR QUANDO PEDE A COORDENADA OU NO TURNO JOGADOR??
-
-def main():
-    #minas('C', 4, 3, 32, 15)
-    #cria_gerador(32, 2^32)
-    minas('Z', 5, 6, 32, 2)
-    #print('   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
-    pass
-
-if __name__ == '__main__':
-    main()
