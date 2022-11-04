@@ -135,7 +135,6 @@ def gera_numero_aleatorio(gerador, n):
 
     gera_numero_aleatorio: gerador * int -> int
     '''
-    #TODO verificar n>0??
     atualiza_estado(gerador)
     seed = obtem_estado(gerador)
     return 1 + (seed % n)
@@ -786,12 +785,11 @@ def limpa_campo(campo, coord):
     if eh_parcela_limpa(parcela):
         return campo
     elif eh_parcela_minada(parcela) or obtem_numero_minas_vizinhas(campo, coord) != 0:
-        #print('ola')
         limpa_parcela(parcela)
         return campo
 
 
-
+    limpa_parcela(parcela)
     stack_vizinhos = []
     #primeira iteracao da coordenada principal
     for v in obtem_coordenadas_vizinhas(coord):
@@ -861,8 +859,9 @@ def minas_exceptions(c, l, n, d, s):
     - c, l verificado com eh_args_coordenada
     - s, s verificado com eh_args_gerador
     '''
+    #print(l * (coluna_para_int(c)+1) - 9)
     return not (eh_args_coordenada(c, l) and eh_args_gerador(d, s) and
-                type(n) == int)
+                type(n) == int and 1 <= n <= l * (coluna_para_int(c)+1) - 9) # TODO
 
 
 
@@ -881,7 +880,6 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
     if minas_exceptions(col, lin, n_parcelas, dim_gerador, seed):
         raise ValueError ('minas: argumentos invalidos')
 
-    # TODO value error e verificar o que acontece quando usamos mais bandeiras do que podemos
     m = cria_campo(col, lin)
     g = cria_gerador(dim_gerador, seed)
 
@@ -895,12 +893,14 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
     coord_inicial = str_para_coordenada(coord_input)
 
     # TODO ELES DEVEM QUERER QUE MINAS NEM RODE ANTES DE VERIFICAR ISTO
-    if not coloca_minas(m, coord_inicial, g, n_parcelas):
-        raise ValueError('minas: argumentos invalidos')
-    #print(tuple(coordenada_para_str(p) for p in obtem_coordenadas(m, 'minadas')))
+    coloca_minas(m, coord_inicial, g, n_parcelas)
+
     limpa_campo(m, coord_inicial)
     print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
     print(campo_para_str(m))
+    if jogo_ganho(m):
+        print('VITORIA!!!')
+        return True
 
     # loop principal
     while True:
@@ -920,8 +920,11 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
 # TODO - VERIFICAR QUANDO PEDE A COORDENADA OU NO TURNO JOGADOR??
 
 def main():
-    minas('C', 5, 10, 32, 15)
+    #minas('C', 4, 3, 32, 15)
+    #cria_gerador(32, 2^32)
+    minas('Z', 5, 6, 32, 2)
     #print('   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|##########################|\n02|##########################|\n03|##########################|\n04|##########################|\n05|##########################|\n  +--------------------------+\nEscolha uma coordenada:   [Bandeiras 0/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1#####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@####|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1###|\n02|11       2#2   111  111###|\n03|         2#2          1###|\n04|         111          1###|\n05|                      1###|\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      1#1 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       1#1   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nEscolha uma ação, [L]impar ou [M]arcar:Escolha uma coordenada:   [Bandeiras 1/6]\n   ABCDEFGHIJKLMNOPQRSTUVWXYZ\n  +--------------------------+\n01|#1       111   1#1  1@1   |\n02|11       2#2   111  111   |\n03|         2#2          111 |\n04|         111          1#1 |\n05|                      111 |\n  +--------------------------+\nVITORIA!!!\n')
+    pass
 
 if __name__ == '__main__':
     main()

@@ -14,9 +14,9 @@ colors = {str(i + 1): color for i, color in enumerate([(255, 0, 0), (0, 255, 0),
 
 # minesweeper stuff
 letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-max_col, max_line = 'C', 5
+max_col, max_line = 'F', 7
 gerador = cria_gerador(32, random.randint(0, 1000000))
-minas = 10
+minas = 15
 
 # window, screen, grid sizes
 height = 680
@@ -31,7 +31,7 @@ for i in range(grid[1]):
 
 screen = pygame.display.set_mode(size)
 font = pygame.font.SysFont("Arial", cell_size - 8)
-big_font = pygame.font.SysFont("Arial", 72, bold=True)
+big_font = pygame.font.SysFont("Arial", 30, bold=True)
 
 states = []
 
@@ -80,7 +80,7 @@ class End(State):
         text = big_font.render(self.mensagem, True, white)
         draw_text(self.screen, text, (width // 2, height // 2))
 
-        text = font.render(
+        text = big_font.render(
             "Pressiona qualquer tecla para recomeçar", True, white)
         draw_text(self.screen, text, (width // 2, height // 2 + 50))
 
@@ -159,7 +159,7 @@ class Menu(State):
         text = big_font.render("Minesweeper", True, white)
         draw_text(self.screen, text, (width // 2, height // 2))
 
-        text = font.render(
+        text = big_font.render(
             "Pressiona qualquer tecla para começar", True, white)
         draw_text(self.screen, text, (width // 2, height // 2 + 50))
 
