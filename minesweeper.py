@@ -907,8 +907,3 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
             print('VITORIA!!!')
             return True
 
-if __name__ == '__main__':
-    for i in range(26):
-        for j in range(1, 100):
-            if not eh_args_TAD_coordenada(int_para_coluna(i), j):
-                print(eh_args_TAD_coordenada(int_para_coluna(i), j))
