@@ -1,7 +1,4 @@
 # Daniel Pereira 199194
-# TODO gerador pode ser objeto?
-# TODO gerador n_bits pode ser o que quiser?
-
 
 # TAD gerador ******************************************************************
 def cria_gerador(n_bits, seed):
@@ -14,7 +11,7 @@ def cria_gerador(n_bits, seed):
     cria_gerador: int * int -> gerador
     '''
     if not eh_args_gerador(n_bits, seed):
-        raise ValueError('cria gerador: argumentos invalidos')
+        raise ValueError('cria_gerador: argumentos invalidos')
 
     return [n_bits, seed]
 
@@ -87,7 +84,7 @@ def eh_args_gerador(n1, n2):
     eh_args_gerador: universal * universal -> booleano
     '''
     return (type(n1) == int and type(n2) == int and n1 in (32, 64) and
-            0 < n2 <= 2**n1) #  TODO
+            0 < n2 <= 2**n1)
 
 
 def eh_gerador(arg):
@@ -111,7 +108,6 @@ def geradores_iguais(g1, g2):
 
     geradores_iguais: gerador * gerador -> booleano
     '''
-    # TODO isto e abstrato?
     return eh_gerador(g1) and eh_gerador(g2) and g1 == g2
 
 
@@ -168,7 +164,7 @@ def cria_coordenada(col, lin):
 
     cria_coordenada: str * int -> coordenada
     '''
-    if not eh_args_coordenada(col, lin):
+    if not eh_args_TAD_coordenada(col, lin):
         raise ValueError('cria_coordenada: argumentos invalidos')
 
     return [col, lin]
@@ -205,7 +201,7 @@ def eh_coordenada(arg):
     eh_coordenada: universal -> booleano
     '''
     return isinstance(arg, list) and len(arg) == 2 and \
-            eh_args_coordenada(arg[0], arg[1])
+            eh_args_TAD_coordenada(arg[0], arg[1])
 
 
 def eh_str_coordenada(arg):
@@ -220,14 +216,14 @@ def eh_str_coordenada(arg):
         eh_coordenada(str_para_coordenada(arg)))
 
 
-def eh_args_coordenada(c, l):
+def eh_args_TAD_coordenada(c, l):
     '''
     Reconhecedor
 
     Devolve True se coluna c e um caracter maiusculo entre A e Z e linha l um numero
     inteiro entre 1 e 99
 
-    eh_args_coordenada: universal * universal -> boolean
+    eh_args_TAD_coordenada: universal * universal -> boolean
     '''
     return isinstance(c, str) and len(c) == 1 and c.isupper() \
             and type(l) == int and 1 <= l <= 99
@@ -241,7 +237,6 @@ def coordenadas_iguais(c1, c2):
 
     coordenadas_iguais: coordenada * coordenada -> booleano
     '''
-    #TODO perguntar abstracao
     return eh_coordenada(c1) and eh_coordenada(c2) and \
         obtem_linha(c1) == obtem_linha(c2) and obtem_coluna(c1) == obtem_coluna(c2)
 
@@ -266,7 +261,6 @@ def str_para_coordenada(s):
 
     str_para_coordenada: str -> coordenada
     '''
-    # TODO abstracao, criar?
     return [s[0], int(s[1:])]
 
 
@@ -302,7 +296,6 @@ def obtem_coordenadas_vizinhas(c):
 
     obtem_coordenadas_vizinhas: coordenada -> tuplo
     '''
-    #TODO perguntar abstracao vizinha
     coord_vizinhas = ()
     col = obtem_coluna(c)
     lin = obtem_linha(c)
@@ -311,7 +304,7 @@ def obtem_coordenadas_vizinhas(c):
     for c_l in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
         col_viz = chr(ord(col) + c_l[0])
         lin_viz = lin + c_l[1]
-        if eh_args_coordenada(col_viz, lin_viz) and col_viz:
+        if eh_args_TAD_coordenada(col_viz, lin_viz) and col_viz:
             coord_vizinhas += (cria_coordenada(col_viz, lin_viz),)
     return coord_vizinhas
 
@@ -492,7 +485,6 @@ def parcela_para_str(p):
 
     parcela_para_str : parcela -> str
     '''
-    #TODO caso nao for um destes casos
     if eh_parcela_tapada(p):
         return '#'
     elif eh_parcela_marcada(p):
@@ -537,7 +529,7 @@ def cria_campo(col, lin):
 
     cria_campo: str * int -> campo
     '''
-    if not eh_args_coordenada(col, lin):
+    if not eh_args_TAD_coordenada(col, lin):
         raise ValueError('cria_campo: argumentos invalidos')
 
     # cria uma lista de tamanho n linhas e sublistas de tamanho n colunas
@@ -820,10 +812,12 @@ def jogo_ganho(campo):
 
     jogo_ganho: campo -> booleano
     '''
-    # verificando todas as parcelas tapadas, se uma delas nao tiver minas, o jogo
-    # ainda nao acabou
+    # verificando todas as parcelas tapadas e marcadas, se uma delas nao tiver
+    # minas, o jogo ainda nao acabou
+    #print(obtem_coordenadas(campo, 'tapadas') + obtem_coordenadas(campo, 'marcadas'))
     return not any(not eh_parcela_minada(obtem_parcela(campo, c))
-                   for c in obtem_coordenadas(campo, 'tapadas'))
+                   for c in obtem_coordenadas(campo, 'tapadas') +
+                            obtem_coordenadas(campo, 'marcadas'))
 
 
 def turno_jogador(campo):
@@ -848,21 +842,21 @@ def turno_jogador(campo):
         if eh_parcela_minada(obtem_parcela(campo, coord)):
             return False
     else:
-        if not (len(obtem_coordenadas(campo, 'marcadas')) >=
-            len(obtem_coordenadas(campo, 'minadas'))):
-            alterna_bandeira(obtem_parcela(campo, coord))
+        '''if not (len(obtem_coordenadas(campo, 'marcadas')) >=
+            len(obtem_coordenadas(campo, 'minadas'))):'''
+        alterna_bandeira(obtem_parcela(campo, coord))
     return True
 
 
 def minas_exceptions(c, l, n, d, s):
     '''
     funcao para verificar os argumentos da funcao minas:
-    - c, l verificado com eh_args_coordenada
+    - c, l verificado com eh_args_TAD_coordenada
     - s, s verificado com eh_args_gerador
     '''
     #print(l * (coluna_para_int(c)+1) - 9)
-    return not (eh_args_coordenada(c, l) and eh_args_gerador(d, s) and
-                type(n) == int and 1 <= n <= l * (coluna_para_int(c)+1) - 9) # TODO
+    return not (eh_args_TAD_coordenada(c, l) and eh_args_gerador(d, s) and
+                type(n) == int and 1 <= n <= l * (coluna_para_int(c)+1) - 9)
 
 
 def minas(col, lin, n_parcelas, dim_gerador, seed):
@@ -892,7 +886,6 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
         coord_input = input('Escolha uma coordenada:')
     coord_inicial = str_para_coordenada(coord_input)
 
-    # TODO ELES DEVEM QUERER QUE MINAS NEM RODE ANTES DE VERIFICAR ISTO
     coloca_minas(m, coord_inicial, g, n_parcelas)
 
     limpa_campo(m, coord_inicial)
@@ -905,7 +898,6 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
     # loop principal
     while True:
         turno = turno_jogador(m)
-        # TODO: quando se perde, ainda mostra o campo com a parcela minada
         print(f'   [Bandeiras {len(obtem_coordenadas(m,"marcadas"))}/{n_parcelas}]')
         print(campo_para_str(m))
         if not turno:
@@ -914,3 +906,9 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
         if jogo_ganho(m):
             print('VITORIA!!!')
             return True
+
+if __name__ == '__main__':
+    for i in range(26):
+        for j in range(1, 100):
+            if not eh_args_TAD_coordenada(int_para_coluna(i), j):
+                print(eh_args_TAD_coordenada(int_para_coluna(i), j))

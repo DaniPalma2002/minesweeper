@@ -14,9 +14,9 @@ colors = {str(i + 1): color for i, color in enumerate([(255, 0, 0), (0, 255, 0),
 
 # minesweeper stuff
 letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-max_col, max_line = 'F', 7
+max_col, max_line = 'M', 5
 gerador = cria_gerador(32, random.randint(0, 1000000))
-minas = 15
+minas = 5
 
 # window, screen, grid sizes
 height = 680
