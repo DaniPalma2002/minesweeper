@@ -225,8 +225,8 @@ def eh_args_TAD_coordenada(c, l):
 
     eh_args_TAD_coordenada: universal * universal -> boolean
     '''
-    return isinstance(c, str) and len(c) == 1 and c.isupper() \
-            and type(l) == int and 1 <= l <= 99
+    return (isinstance(c, str) and len(c) == 1 and c.isupper()
+            and type(l) == int and 1 <= l <= 99)
 
 
 def coordenadas_iguais(c1, c2):
