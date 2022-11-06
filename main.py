@@ -2,6 +2,7 @@ from minesweeper import *
 import pygame
 import sys
 import random
+import asyncio
 
 pygame.init()
 pygame.display.set_caption('Minesweeper')
@@ -14,9 +15,9 @@ colors = {str(i + 1): color for i, color in enumerate([(255, 0, 0), (0, 255, 0),
 
 # minesweeper stuff
 letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-max_col, max_line = 'M', 5
+max_col, max_line = 'T', 14
 gerador = cria_gerador(32, random.randint(0, 1000000))
-minas = 5
+minas = 40
 
 # window, screen, grid sizes
 height = 680
@@ -208,19 +209,23 @@ def turno_jogador_gamepy(mapa, input_jogo):
 
 
 ## START GAME
-states.append(Menu(screen))
+async def main():
+    states.append(Menu(screen))
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit(0)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            pygame.quit()
-            sys.exit(0)
-        states[-1].handle_event(event)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit(0)
+            states[-1].handle_event(event)
 
-    screen.fill(black)
-    for state in states:
-        state.draw()
-    pygame.display.flip()
+        screen.fill(black)
+        await asyncio.sleep(0)
+        for state in states:
+            state.draw()
+        pygame.display.flip()
+
+asyncio.run(main())

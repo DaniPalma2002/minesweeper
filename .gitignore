@@ -4,3 +4,6 @@ __pycache__/minesweeper.cpython-37.pyc
 .gitignore
 teste.txt
 __pycache__/test_publico_FP2223P2.cpython-37-pytest-7.2.0.pyc
+build/web-cache
+build/web.zip
+build/web/minesweeper.apk
