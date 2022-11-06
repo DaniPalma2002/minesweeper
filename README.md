@@ -11,3 +11,6 @@ pygbag /folder
 ```
 
 where `folder` is project folder with the file main.py
+
+# Game on itch.io
+https://danipalma2002.itch.io/minesweeper
