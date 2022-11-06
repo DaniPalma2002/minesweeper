@@ -545,7 +545,14 @@ def cria_copia_campo(campo):
 
     cria_copia_campo: campo -> campo
     '''
-    return [copia_campo[:] for copia_campo in campo]
+    #return [copia_campo[:] for copia_campo in campo]
+    copia = []
+    for i in campo:
+        temp = []
+        for j in i:
+            temp.append(j.copy())
+        copia.append(temp)
+    return copia
 
 
 def obtem_ultima_coluna(campo):
