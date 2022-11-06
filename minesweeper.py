@@ -167,7 +167,7 @@ def cria_coordenada(col, lin):
     if not eh_args_TAD_coordenada(col, lin):
         raise ValueError('cria_coordenada: argumentos invalidos')
 
-    return [col, lin]
+    return (col, lin)
 
 
 def obtem_coluna(c):
@@ -200,7 +200,7 @@ def eh_coordenada(arg):
 
     eh_coordenada: universal -> booleano
     '''
-    return isinstance(arg, list) and len(arg) == 2 and \
+    return isinstance(arg, tuple) and len(arg) == 2 and \
             eh_args_TAD_coordenada(arg[0], arg[1])
 
 
@@ -261,7 +261,7 @@ def str_para_coordenada(s):
 
     str_para_coordenada: str -> coordenada
     '''
-    return [s[0], int(s[1:])]
+    return (s[0], int(s[1:]))
 
 
 def coluna_para_int(col):
@@ -645,8 +645,8 @@ def eh_campo(arg):
 
     eh_campo: universal -> booleano
     '''
-    return (isinstance(arg, list) and
-            all(isinstance(i, list) and len(i) == len(arg[0]) and
+    return (isinstance(arg, list) and len(arg) > 0 and
+            all(isinstance(i, list) and len(i) == len(arg[0]) and len(i) > 0 and
                 all(eh_parcela(j) for j in i) for i in arg))
 
 
