@@ -545,7 +545,6 @@ def cria_copia_campo(campo):
 
     cria_copia_campo: campo -> campo
     '''
-    #return [copia_campo[:] for copia_campo in campo]
     copia = []
     for i in campo:
         temp = []
@@ -778,9 +777,7 @@ def limpa_campo(campo, coord):
 
     limpa_campo: campo * coordenada -> campo
     '''
-    #limpa_parcela(obtem_parcela(campo, coord))
     parcela = obtem_parcela(campo, coord)
-    #print(parcela)
 
     if eh_parcela_limpa(parcela):
         return campo
@@ -796,15 +793,13 @@ def limpa_campo(campo, coord):
         if (eh_coord_campo_tapada(campo, v)):
             stack_vizinhos.append(v)
 
-    #print(stack_vizinhos)
     while len(stack_vizinhos) > 0:
         c_atual = stack_vizinhos.pop()
         limpa_parcela(obtem_parcela(campo, c_atual))
         # so se c_atual nao ter minas na vizinhanca e que vamos aos seus vizinhos
         if obtem_numero_minas_vizinhas(campo, c_atual) == 0:
             for v in obtem_coordenadas_vizinhas(c_atual):
-                if (eh_coord_campo_tapada(campo, v) and
-                    v not in stack_vizinhos):
+                if (eh_coord_campo_tapada(campo, v) and v not in stack_vizinhos):
                     stack_vizinhos.append(v)
 
     return campo
@@ -821,7 +816,6 @@ def jogo_ganho(campo):
     '''
     # verificando todas as parcelas tapadas e marcadas, se uma delas nao tiver
     # minas, o jogo ainda nao acabou
-    #print(obtem_coordenadas(campo, 'tapadas') + obtem_coordenadas(campo, 'marcadas'))
     return not any(not eh_parcela_minada(obtem_parcela(campo, c))
                    for c in obtem_coordenadas(campo, 'tapadas') +
                             obtem_coordenadas(campo, 'marcadas'))
@@ -849,8 +843,6 @@ def turno_jogador(campo):
         if eh_parcela_minada(obtem_parcela(campo, coord)):
             return False
     else:
-        '''if not (len(obtem_coordenadas(campo, 'marcadas')) >=
-            len(obtem_coordenadas(campo, 'minadas'))):'''
         alterna_bandeira(obtem_parcela(campo, coord))
     return True
 
@@ -913,4 +905,3 @@ def minas(col, lin, n_parcelas, dim_gerador, seed):
         if jogo_ganho(m):
             print('VITORIA!!!')
             return True
-
